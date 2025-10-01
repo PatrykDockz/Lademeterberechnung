@@ -95,6 +95,7 @@ combo_fahrzeug.grid(row=4, column=1)
 tk.Label(root, text="").grid(row=6)  # Leerzeile für Abstand
 tk.Label(root, text="Hinweis: Stapelbarkeit 0 bedeutet, dass Paletten nicht stapelbar sind.").grid(row=5, column=0, columnspan=2)
 tk.Label(root, text="").grid(row=6)  # Leerzeile für Abstand
+tk.Label(root, text="Die Berechnung des Preises ist eine Schätzung und kann je nach Fahrzeug und Route variieren.").grid(row=6, column=0, columnspan=2)
 
 btn_berechnen = tk.Button(root, text="Berechnen", command=berechnen)
 btn_berechnen.grid(row=7, column=0, columnspan=2, pady=10)
@@ -103,3 +104,4 @@ label_ergebnis = tk.Label(root, text="Ergebnis wird hier angezeigt.")
 label_ergebnis.grid(row=8, column=0, columnspan=2)
 
 root.mainloop()
+
