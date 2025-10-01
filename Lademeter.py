@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 def berechne_lademeter(palettengroesse: str, menge: int, stapelbarkeit: int) -> float:
     try:
@@ -16,7 +16,7 @@ def berechne_lademeter(palettengroesse: str, menge: int, stapelbarkeit: int) -> 
         lademeter_pro_palette = (breite_m / 2.4) * laenge_m
         gesamt_lademeter = lademeter_pro_palette * menge
 
-# Stapelbarkeit berücksichtigen
+        # Stapelbarkeit berücksichtigen
         if stapelbarkeit > 0:
             gesamt_lademeter = gesamt_lademeter / (2 ** stapelbarkeit)
         # stapelbarkeit == 0: keine Änderung
@@ -27,21 +27,44 @@ def berechne_lademeter(palettengroesse: str, menge: int, stapelbarkeit: int) -> 
         messagebox.showerror("Fehler", f"Fehler: {e}")
         return 0.0
 
+def berechne_preis(kilometer: float, fahrzeug: str) -> float:
+    grundpreis = 80.0
+    grund_km = 40
+    km_preise = {
+        "Sprinter": 0.40,
+        "Planensprinter": 0.60,
+        "Klein LKW": 0.65,
+        "7,5 Tonnen LKW": 0.75,
+        "Tautliner": 0.90,
+        "Mega": 1.00,
+        "Jumbo": 1.20
+    }
+    km_preis = km_preise.get(fahrzeug, 0.35)
+    if kilometer <= grund_km:
+        preis = grundpreis
+    else:
+        preis = grundpreis + (kilometer - grund_km) * km_preis
+    return round(preis, 2)
+
 def berechnen():
     palettengroesse = entry_groesse.get()
     try:
         menge = int(entry_menge.get())
         stapelbarkeit = int(entry_stapel.get())
-        print(f"Berechne mit Stapelbarkeit: {stapelbarkeit}")  # Debug-Ausgabe
+        kilometer = float(entry_km.get())
+        fahrzeug = combo_fahrzeug.get()
         if stapelbarkeit == 0:
             messagebox.showinfo("Hinweis", "Stapelbarkeit 0 bedeutet: Paletten sind nicht stapelbar.")
     except ValueError:
-        messagebox.showerror("Fehler", "Bitte gib ganze Zahlen für Menge und Stapelbarkeit ein.")
+        messagebox.showerror("Fehler", "Bitte gib gültige Zahlen ein.")
         label_ergebnis.config(text="❌ Fehlerhafte Eingabe!")
         return
 
     lademeter = berechne_lademeter(palettengroesse, menge, stapelbarkeit)
-    label_ergebnis.config(text=f"✅ Die berechneten Lademeter betragen: {lademeter} m")
+    preis = berechne_preis(kilometer, fahrzeug)
+    label_ergebnis.config(
+        text=f"✅ Die berechneten Lademeter betragen: {lademeter} m\n💶 Ungefährer Preis: {preis} €"
+    )
 
 root = tk.Tk()
 root.title("Lademeter-Berechnungstool")
@@ -58,10 +81,25 @@ tk.Label(root, text="Stapelbarkeit (z.B. 1, 2, 3):").grid(row=2, column=0, stick
 entry_stapel = tk.Entry(root)
 entry_stapel.grid(row=2, column=1)
 
+tk.Label(root, text="Kilometer:").grid(row=3, column=0, sticky="e")
+entry_km = tk.Entry(root)
+entry_km.grid(row=3, column=1)
+
+tk.Label(root, text="Fahrzeugtyp:").grid(row=4, column=0, sticky="e")
+combo_fahrzeug = ttk.Combobox(root, values=[
+    "Sprinter", "Planensprinter", "Klein LKW", "7,5 Tonnen LKW", "Tautliner", "Mega", "Jumbo"
+])
+combo_fahrzeug.current(0)
+combo_fahrzeug.grid(row=4, column=1)
+
+tk.Label(root, text="").grid(row=6)  # Leerzeile für Abstand
+tk.Label(root, text="Hinweis: Stapelbarkeit 0 bedeutet, dass Paletten nicht stapelbar sind.").grid(row=5, column=0, columnspan=2)
+tk.Label(root, text="").grid(row=6)  # Leerzeile für Abstand
+
 btn_berechnen = tk.Button(root, text="Berechnen", command=berechnen)
-btn_berechnen.grid(row=3, column=0, columnspan=2, pady=10)
+btn_berechnen.grid(row=7, column=0, columnspan=2, pady=10)
 
 label_ergebnis = tk.Label(root, text="Ergebnis wird hier angezeigt.")
-label_ergebnis.grid(row=4, column=0, columnspan=2)
+label_ergebnis.grid(row=8, column=0, columnspan=2)
 
 root.mainloop()
