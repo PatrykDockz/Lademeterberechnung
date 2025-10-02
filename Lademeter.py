@@ -1,5 +1,24 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
+import requests
+
+def get_kilometer_von_orten(start, ziel, api_key):
+    url = "https://api.openrouteservice.org/v2/directions/driving-car"
+    headers = {'Authorization': api_key}
+    # Hole Koordinaten
+    def get_coords(ort):
+        geo_url = f"https://api.openrouteservice.org/geocode/search?api_key={api_key}&text={ort}"
+        resp = requests.get(geo_url).json()
+        coords = resp['features'][0]['geometry']['coordinates']
+        return coords
+    start_coords = get_coords(start)
+    ziel_coords = get_coords(ziel)
+    body = {
+        "coordinates": [start_coords, ziel_coords]
+    }
+    resp = requests.post(url, json=body, headers=headers)
+    dist_m = resp.json()['features'][0]['properties']['segments'][0]['distance']
+    return round(dist_m / 1000, 1)
 
 def berechne_lademeter(palettengroesse: str, menge: int, stapelbarkeit: int) -> float:
     try:
@@ -104,4 +123,5 @@ label_ergebnis = tk.Label(root, text="Ergebnis wird hier angezeigt.")
 label_ergebnis.grid(row=8, column=0, columnspan=2)
 
 root.mainloop()
+
 
